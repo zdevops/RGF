@@ -1,0 +1,36 @@
+toGraphite:
+
+	parse arg key,val,ip,port
+
+
+	CRLF = '0D25'x
+	server = ''
+
+
+
+	/* Get the Current Timestamp in Epoch */
+	call syscalls 'ON'
+	address syscall 'time'
+	call syscalls 'OFF'
+	ts = retval
+
+
+
+	/* Start the socket */
+	call Socket 'Initialize', 'henri00'
+	server = Socket('GetHostId')
+	ipaddress = server
+	s = Socket('Socket')
+	parse var s rval c
+	call Socket 'SetSockOpt',c,'Sol_Socket','So_ASCII','On'
+	call Socket 'SetSockOpt', c,'Sol_Socket','SO_REUSEADDR','On'
+	call Socket 'Connect', c, 'AF_INET' port, ip
+
+	/* Write value to key ;) */
+	call Socket 'Write', c, key val ts CRLF
+
+	/* Close & Term Socket */
+	call Socket 'Close', c
+	call Socket 'Terminate'
+
+	Return 0
